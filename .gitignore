@@ -1,0 +1,24 @@
+# Hidden file
+.*
+
+# Keep hidden files related to Git
+!.gitignore
+!.github/
+
+# Local/site-specific environment files
+env/*.conf
+
+# Keep templates
+!env/example.conf
+!env/training.conf
+
+# Build/generated files
+result
+result-*
+
+build/
+**/build/
+
+output/
+**/output/
+

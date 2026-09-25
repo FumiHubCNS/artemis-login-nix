@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ "$#" -ne 2 ]; then
+    echo "usage: artlogin-nix <group> <username>"
+    exit 1
+fi
+
+GROUP="$1"
+USERNAME="$2"
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+CONF="$ROOT_DIR/env/${GROUP}.conf"
+
+if [ ! -f "$CONF" ]; then
+    echo "error: configuration not found:"
+    echo "  $CONF"
+    exit 1
+fi
+
+set -a
+source "$CONF"
+set +a
+
+source "$ROOT_DIR/scripts/repo-resolve.sh"
+source "$ROOT_DIR/scripts/artlogin-common.sh"
+
+GROUP_SCRIPT="$ROOT_DIR/scripts/artlogin-${GROUP}.sh"
+
+if [ -f "$GROUP_SCRIPT" ]; then
+    source "$GROUP_SCRIPT"
+fi
+
+artlogin_common "$USERNAME"
+
+echo
+echo "ARTEMIS_USER    = $ARTEMIS_USER"
+echo "ARTEMIS_WORKDIR = $ARTEMIS_WORKDIR"
+
+cd "$ARTEMIS_WORKDIR"
+
+exec nix develop #"${SHELL:-/bin/bash}" -i
