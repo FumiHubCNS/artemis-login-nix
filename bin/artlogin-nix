@@ -2,6 +2,8 @@
 
 set -e
 
+CALL_DIR="$PWD"
+
 if [ "$#" -ne 2 ]; then
     echo "usage: artlogin-nix <group> <username>"
     exit 1
@@ -35,10 +37,16 @@ fi
 
 artlogin_common "$USERNAME"
 
+if [[ "$ARTEMIS_WORKDIR" != /* ]]; then
+    ARTEMIS_WORKDIR="$CALL_DIR/$ARTEMIS_WORKDIR"
+fi
+
+ARTEMIS_WORKDIR="$(realpath -m "$ARTEMIS_WORKDIR")"
+
 echo
 echo "ARTEMIS_USER    = $ARTEMIS_USER"
 echo "ARTEMIS_WORKDIR = $ARTEMIS_WORKDIR"
 
-cd "$ARTEMIS_WORKDIR"
+cd "$ARTEMIS_WORKDIR" || exit 1
 
 exec nix develop #"${SHELL:-/bin/bash}" -i
