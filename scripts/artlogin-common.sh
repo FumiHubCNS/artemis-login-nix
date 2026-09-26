@@ -12,6 +12,7 @@
 #   ART_DATA_DIR
 #   ARTLOGIN_USE_GIT_FLOW
 #   ARTLOGIN_INIT_SUBMODULES
+#   REPO_BRANCH
 #
 # Repository URL is resolved by repo_resolve_url(),
 # which should be provided by scripts/repo-resolve.sh.
@@ -304,7 +305,13 @@ artlogin_create_user()
 
     artlogin_info "Cloning repository ..."
 
-    if ! git clone "$repos_url" "$userdir"; then
+    local -a clone_args=("$repos_url" "$userdir")
+
+    if [ -n "${REPO_BRANCH:-}" ]; then
+        clone_args=(--branch "$REPO_BRANCH" "${clone_args[@]}")
+    fi
+
+    if ! git clone "${clone_args[@]}"; then
         artlogin_error "git clone failed."
         return 1
     fi

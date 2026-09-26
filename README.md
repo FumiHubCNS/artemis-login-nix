@@ -226,6 +226,22 @@ SSH_HOST="github.com"
 
 `SSH_HOST`にはAliasも使えます。
 
+### Local Git repository
+
+```bash
+ART_ANALYSIS_DIR="./tutorial"
+
+ART_DATA_DIR=""
+ART_OUTPUT_DIR=""
+
+REPO_TYPE="local"
+REPO_PROTOCOL="local"
+
+REPO_LOCAL_PATH="/path/to/hoge.git"
+
+REPO_BRANCH=""
+```
+
 ### 変数の説明
 
 `ART_DATA_DIR` / `ART_OUTPUT_DIR`は生データや生成ファイルのシンボリックリンク用の変数です。
