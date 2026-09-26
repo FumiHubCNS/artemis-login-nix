@@ -265,7 +265,7 @@ rawdata -> /path/to/data
 出力ディレクトリを指定した場合、
 
 ```text
-output -> /path/to/output
+output -> /path/to/output/[user name]
 ```
 
 が作成されます。
