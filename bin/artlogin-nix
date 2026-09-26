@@ -3,6 +3,8 @@
 set -e
 
 ARTLOGIN_CREATED=0
+export ARTLOGIN_CREATED
+
 CALL_DIR="$PWD"
 
 if [ "$#" -ne 2 ]; then
