@@ -368,6 +368,7 @@ artlogin_common()
     local username="${1:-}"
     local userdir
 
+    export ARTLOGIN_CREATED=0
 
     if [ -z "$username" ]; then
         artlogin_error "username is required."
@@ -414,6 +415,8 @@ artlogin_common()
     # --------------------------------------------------------
 
     artlogin_create_user "$username" "$userdir" || return 1
+
+    export ARTLOGIN_CREATED=1
 
     return 0
 }
