@@ -8,19 +8,43 @@ if [ "$#" -ne 2 ]; then
     echo "usage: artlogin-nix <group> <username>"
     exit 1
 fi
-
 GROUP="$1"
 USERNAME="$2"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-CONF="$ROOT_DIR/env/${GROUP}.conf"
+XDG_ARTLOGIN_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/artemis-login"
+REPO_CONFIG_DIR="${ROOT_DIR}/env"
 
-if [ ! -f "$CONF" ]; then
-    echo "error: configuration not found:"
-    echo "  $CONF"
+if [ -n "${ARTLOGIN_CONFIG_DIR:-}" ]; then
+    CONF="${ARTLOGIN_CONFIG_DIR}/${GROUP}.conf"
+
+    if [ ! -f "$CONF" ]; then
+        echo "artlogin: error: configuration not found:"
+        echo "  $CONF"
+        exit 1
+    fi
+
+elif [ -f "${XDG_ARTLOGIN_CONFIG_DIR}/${GROUP}.conf" ]; then
+    CONF="${XDG_ARTLOGIN_CONFIG_DIR}/${GROUP}.conf"
+
+elif [ -f "${REPO_CONFIG_DIR}/${GROUP}.conf" ]; then
+    CONF="${REPO_CONFIG_DIR}/${GROUP}.conf"
+
+else
+    echo "artlogin: error: configuration '${GROUP}.conf' not found."
+    echo
+    echo "Searched:"
+    echo "  ${XDG_ARTLOGIN_CONFIG_DIR}/${GROUP}.conf"
+    echo "  ${REPO_CONFIG_DIR}/${GROUP}.conf"
+    echo
+    echo "You can also specify a configuration directory with:"
+    echo "  ARTLOGIN_CONFIG_DIR=/path/to/config"
     exit 1
 fi
+
+echo "artlogin: configuration:"
+echo "  $CONF"
 
 set -a
 source "$CONF"
