@@ -13,8 +13,11 @@ USERNAME="$2"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+GROUP_SCRIPT=""
+
 XDG_ARTLOGIN_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/artemis-login"
 REPO_CONFIG_DIR="${ROOT_DIR}/env"
+REPO_SCRIPT_DIR="${ROOT_DIR}/scripts"
 
 if [ -n "${ARTLOGIN_CONFIG_DIR:-}" ]; then
     CONF="${ARTLOGIN_CONFIG_DIR}/${GROUP}.conf"
@@ -43,6 +46,17 @@ else
     exit 1
 fi
 
+if [ -n "${ARTLOGIN_CONFIG_DIR:-}" ] && [ -f "${ARTLOGIN_CONFIG_DIR}/${GROUP}.sh" ]; then
+    GROUP_SCRIPT="${ARTLOGIN_CONFIG_DIR}/${GROUP}.sh"
+
+elif [ -f "${XDG_ARTLOGIN_CONFIG_DIR}/${GROUP}.sh" ]; then
+    GROUP_SCRIPT="${XDG_ARTLOGIN_CONFIG_DIR}/${GROUP}.sh"
+
+elif [ -f "${REPO_SCRIPT_DIR}/${GROUP}.sh" ]; then
+    GROUP_SCRIPT="${REPO_SCRIPT_DIR}/${GROUP}.sh"
+
+fi
+
 echo "artlogin: configuration:"
 echo "  $CONF"
 
@@ -52,12 +66,6 @@ set +a
 
 source "$ROOT_DIR/scripts/repo-resolve.sh"
 source "$ROOT_DIR/scripts/artlogin-common.sh"
-
-GROUP_SCRIPT="$ROOT_DIR/scripts/artlogin-${GROUP}.sh"
-
-if [ -f "$GROUP_SCRIPT" ]; then
-    source "$GROUP_SCRIPT"
-fi
 
 artlogin_common "$USERNAME"
 
@@ -72,5 +80,29 @@ echo "ARTEMIS_USER    = $ARTEMIS_USER"
 echo "ARTEMIS_WORKDIR = $ARTEMIS_WORKDIR"
 
 cd "$ARTEMIS_WORKDIR" || exit 1
+
+if [ ! -f flake.nix ]; then
+    echo "artlogin: error: flake.nix not found:"
+    echo "  $ARTEMIS_WORKDIR/flake.nix"
+    exit 1
+fi
+
+echo
+echo "artlogin: entering Nix development environment:"
+echo "  $ARTEMIS_WORKDIR"
+echo
+
+if [ -n "$GROUP_SCRIPT" ]; then
+    echo
+    echo "artlogin: loading group setup script:"
+    echo "  $GROUP_SCRIPT"
+
+    # Source instead of executing so exported variables and shell
+    # settings are inherited by `nix develop`.
+    source "$GROUP_SCRIPT"
+else
+    echo
+    echo "artlogin: no group-specific setup script found; skipping."
+fi
 
 exec nix develop #"${SHELL:-/bin/bash}" -i
