@@ -242,10 +242,27 @@ artlogin_setup_directories()
         "rawdata" \
         "ART_DATA_DIR" || return 1
 
-    artlogin_setup_link \
-        "${ART_OUTPUT_DIR:-}" \
-        "output" \
-        "ART_OUTPUT_DIR" || return 1
+    if [ -n "${ART_OUTPUT_DIR:-}" ]; then
+        local user_output_dir="${ART_OUTPUT_DIR}/${ARTEMIS_USER}"
+
+        if [ ! -d "$user_output_dir" ]; then
+            artlogin_info "Creating user output directory:"
+            echo "  $user_output_dir"
+
+            if ! mkdir -p "$user_output_dir"; then
+                artlogin_error "failed to create user output directory:"
+                echo "  $user_output_dir" >&2
+                return 1
+            fi
+        fi
+
+        artlogin_setup_link \
+            "$user_output_dir" \
+            "output" \
+            "ART_OUTPUT_DIR" || return 1
+    else
+        artlogin_info "ART_OUTPUT_DIR is empty; output link is not created."
+    fi
 
     return 0
 }
